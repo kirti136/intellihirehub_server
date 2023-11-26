@@ -1,0 +1,46 @@
+Table job_seekers {
+  id integer [primary key]
+  name varchar
+  status boolean [note: 'Active/Inactive']
+  skills text
+  experience varchar [note: 'Entry Level, Mid Level, Senior']
+  bio text
+  availability date
+  created_at timestamp
+}
+
+Table job_postings {
+  id integer [primary key]
+  hiring_manager_id integer [ref: > hiring_managers.id]
+  job_title varchar
+  status varchar [note: 'Open, In Progress, Filled']
+  start_date date
+  end_date date
+  created_at timestamp
+}
+
+Table applications {
+  id integer [primary key]
+  job_posting_id integer [ref: > job_postings.id]
+  job_seeker_id integer [ref: > job_seekers.id]
+  status varchar [note: 'Pending, Reviewed, Accepted, Rejected']
+  created_at timestamp
+}
+
+Table skill_sets {
+  id integer [primary key]
+  skill_name varchar
+  job_posting_id integer [ref: > job_postings.id]
+  created_at timestamp
+}
+
+Table hiring_managers {
+  id integer [primary key]
+  name varchar
+  email varchar [unique]
+  phone_number varchar
+}
+
+Ref: applications.job_posting_id > job_postings.id [note: 'many-to-one']
+Ref: applications.job_seeker_id > job_seekers.id [note: 'many-to-one']
+Ref: skill_sets.job_posting_id > job_postings.id [note: 'one-to-many']
