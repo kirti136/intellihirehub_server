@@ -1,0 +1,11 @@
+# flask
+# flask_cors
+# flask_pymongo
+# python-dotenv
+# pymongo
+# flask_migrate  # If using migrations
+# pytest         # If setting up tests
+# sphinx         # If generating documentation
+# requests       # Additional utility
+# python-dateutil
+# # Add other dependencies as needed
