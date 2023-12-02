@@ -12,7 +12,6 @@ import datetime
 load_dotenv()
 # Get the JWT secret key from environment variables
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-
 # Set token expiration time (in seconds), for example, 1 day
 TOKEN_EXPIRATION = 86400  # 24 hours * 60 minutes * 60 seconds
 
@@ -119,6 +118,46 @@ def user_details():
             return jsonify({'message': 'User details fetched', 'user_details': user_details})
         else:
             return jsonify({'message': 'User not found'}), 404
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({'message': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401
+
+@user_routes.route('/user-details', methods=['PATCH'])
+def update_user_details():
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'message': 'Token is missing'}), 401
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        user_id = payload['user_id']
+
+        user = User.find_by_id(user_id)
+        if not user:
+            return jsonify({'message': 'User not found'}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'message': 'Invalid data received'}), 400
+
+        # Check if any specific field needs to be updated
+        if 'name' in data:
+            user['name'] = data['name']
+        if 'email' in data:
+            user['email'] = data['email']
+
+        # Save the updated user data
+        User.update(user_id, {'name': user['name'], 'email': user['email']})
+
+        user_details = {
+            'id': str(user['_id']),
+            'name': user['name'],
+            'email': user['email'],
+            'role': user['role']
+        }
+        return jsonify({'message': 'User details updated', 'user_details': user_details})
 
     except jwt.ExpiredSignatureError:
         return jsonify({'message': 'Token has expired'}), 401

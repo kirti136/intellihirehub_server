@@ -31,3 +31,13 @@ class User:
         db = get_database()
         collection = db['users']
         return collection.find_one({'_id': ObjectId(user_id)})
+
+    @staticmethod
+    def update( user_id, updated_data):
+        db = get_database()
+        collection = db['users']
+
+        query = {'_id': ObjectId(user_id)}
+        new_values = {'$set': updated_data}
+
+        collection.update_one(query, new_values)
