@@ -1,6 +1,20 @@
+from app.models.user import User  # Import your User model
+from flask import jsonify, request
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models.user import User
+import jwt
+import os
+from dotenv import load_dotenv
+import datetime
+
+# Load environment variables from .env file
+load_dotenv()
+# Get the JWT secret key from environment variables
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+
+# Set token expiration time (in seconds), for example, 1 day
+TOKEN_EXPIRATION = 86400  # 24 hours * 60 minutes * 60 seconds
 
 user_routes = Blueprint('user_routes', __name__)
 
@@ -61,10 +75,52 @@ def login():
 
             user = User.find_by_email(email)
             if user and check_password_hash(user['password'], password):
-                # Remove password from the user data before sending it back
-                user.pop('password', None)
-                return jsonify({'message': 'Login successful', 'user': user})
+                user_id = str(user['_id'])
+
+                # Set token expiration time
+                expiration = datetime.datetime.utcnow(
+                ) + datetime.timedelta(days=1)  # 1 day expiration
+
+                # Generate token with expiration time
+                payload = {
+                    'user_id': user_id,
+                    'exp': expiration
+                }
+                token = jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
+
+                return jsonify({'message': 'Login successful', 'token': token})
             else:
                 return jsonify({'message': 'Invalid credentials'}), 401
         else:
             return jsonify({'message': 'Invalid data received'}), 400
+
+
+@user_routes.route('/user-details', methods=['GET'])
+def user_details():
+    token = request.headers.get('Authorization')
+    print(token)
+    if not token:
+        return jsonify({'message': 'Token is missing'}), 401
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        user_id = payload['user_id']
+
+        # Fetch user details based on user_id
+        user = User.find_by_id(user_id)
+        print(user)
+        if user:
+            user_details = {
+                'id': str(user['_id']),  # Assuming '_id' is MongoDB's ObjectId
+                'name': user['name'],
+                'email': user['email'],
+                'role': user['role']
+            }
+            return jsonify({'message': 'User details fetched', 'user_details': user_details})
+        else:
+            return jsonify({'message': 'User not found'}), 404
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({'message': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401

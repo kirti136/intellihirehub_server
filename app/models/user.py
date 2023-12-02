@@ -1,4 +1,5 @@
 from app.database import get_database
+from bson import ObjectId
 
 
 class User:
@@ -24,3 +25,9 @@ class User:
         db = get_database()
         collection = db['users']  # Assuming 'users' is the collection name
         return collection.find_one({'email': email})
+
+    @staticmethod
+    def find_by_id(user_id):
+        db = get_database()
+        collection = db['users']
+        return collection.find_one({'_id': ObjectId(user_id)})
