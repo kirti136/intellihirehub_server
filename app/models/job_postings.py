@@ -12,7 +12,8 @@ class JobPosting:
 
     def save(self):
         db = get_database()
-        collection = db['job_postings']  # Assuming 'job_postings' is the collection name
+        # Assuming 'job_postings' is the collection name
+        collection = db['job_postings']
         job_data = {
             'job_title': self.job_title,
             'status': self.status,

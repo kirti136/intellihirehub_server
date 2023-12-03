@@ -75,6 +75,7 @@ def login():
             user = User.find_by_email(email)
             if user and check_password_hash(user['password'], password):
                 user_id = str(user['_id'])
+                role = str(user['role'])
 
                 # Set token expiration time
                 expiration = datetime.datetime.utcnow(
@@ -87,7 +88,7 @@ def login():
                 }
                 token = jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
 
-                return jsonify({'message': 'Login successful', 'token': token})
+                return jsonify({'message': 'Login successful', 'token': token, 'role': role})
             else:
                 return jsonify({'message': 'Invalid credentials'}), 401
         else:
@@ -123,6 +124,7 @@ def user_details():
         return jsonify({'message': 'Token has expired'}), 401
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Invalid token'}), 401
+
 
 @user_routes.route('/user-details', methods=['PATCH'])
 def update_user_details():
