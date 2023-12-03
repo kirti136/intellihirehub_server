@@ -44,3 +44,14 @@ class JobPosting:
         db = get_database()
         collection = db['job_postings']
         return collection.find({'hiring_manager_id': hiring_manager_id})
+
+    @staticmethod
+    def find_all_except_user(user_id):
+        db = get_database()
+        collection = db['job_postings']
+
+        # Query to fetch all job postings except those created by the specified user
+        all_except_user = collection.find(
+            {'hiring_manager_id': {'$ne': user_id}})
+
+        return all_except_user

@@ -157,3 +157,62 @@ def update_job_posting(job_id):
         return jsonify({'message': 'Invalid token'}), 401
     except Exception as e:
         return jsonify({'message': 'Failed to update job posting', 'error': str(e)}), 500
+
+
+@job_postings_routes.route('/other-job-postings', methods=['GET'])
+def get_other_job_postings():
+    # Get the token from the request headers
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'message': 'Token is missing'}), 401
+
+    try:
+        # Decode the token to get the user ID
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        user_id = payload.get('user_id')
+
+        # Fetch all job postings excluding those created by the user
+        all_job_postings = JobPosting.find_all_except_user(user_id)
+
+        # Format and return the job postings data
+        job_postings_data = []
+        for posting in all_job_postings:
+            job_postings_data.append({
+                '_id': str(posting['_id']),
+                'job_title': posting['job_title'],
+                'status': posting['status'],
+                'start_date': str(posting['start_date']),
+                'end_date': str(posting['end_date'])
+            })
+
+        return jsonify({'job_postings': job_postings_data}), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({'message': 'Token has expired'}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Invalid token'}), 401
+    except Exception as e:
+        return jsonify({'message': 'Failed to fetch job postings', 'error': str(e)}), 500
+
+
+@job_postings_routes.route('/all-job-postings', methods=['GET'])
+def get_all_job_postings():
+    try:
+        # Fetch all job postings from the database
+        all_job_postings = JobPosting.find_all()
+
+        # Format the job postings data
+        job_postings_data = []
+        for posting in all_job_postings:
+            job_postings_data.append({
+                '_id': str(posting['_id']),  # Convert ObjectId to string
+                'job_title': posting['job_title'],
+                'status': posting['status'],
+                'start_date': str(posting['start_date']),
+                'end_date': str(posting['end_date'])
+            })
+
+        return jsonify({'job_postings': job_postings_data}), 200
+
+    except Exception as e:
+        return jsonify({'message': 'Failed to fetch job postings', 'error': str(e)}), 500
