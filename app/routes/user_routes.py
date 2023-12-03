@@ -97,7 +97,7 @@ def login():
 @user_routes.route('/user-details', methods=['GET'])
 def user_details():
     token = request.headers.get('Authorization')
-    print(token)
+    # print(token)
     if not token:
         return jsonify({'message': 'Token is missing'}), 401
 
@@ -107,7 +107,7 @@ def user_details():
 
         # Fetch user details based on user_id
         user = User.find_by_id(user_id)
-        print(user)
+        # print(user)
         if user:
             user_details = {
                 'id': str(user['_id']),  # Assuming '_id' is MongoDB's ObjectId
