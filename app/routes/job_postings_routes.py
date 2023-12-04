@@ -15,8 +15,6 @@ job_postings_routes = Blueprint('job_postings_routes', __name__)
 @job_postings_routes.route('/create-job-posting', methods=['POST'])
 def create_job_posting():
     data = request.get_json()
-
-    # Assuming the token is present in the headers with key 'Authorization'
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({'message': 'Token is missing'}), 401

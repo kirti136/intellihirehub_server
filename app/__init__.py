@@ -2,6 +2,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from app.routes.user_routes import user_routes
 from app.routes.job_postings_routes import job_postings_routes
+from app.routes.job_seekers_routes import job_seeker_profile_routes
+
 
 app = Flask(__name__)
 CORS(app)
@@ -14,3 +16,4 @@ def welcome():
 
 app.register_blueprint(user_routes)
 app.register_blueprint(job_postings_routes)
+app.register_blueprint(job_seeker_profile_routes)

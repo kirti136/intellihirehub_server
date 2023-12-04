@@ -12,7 +12,6 @@ class JobPosting:
 
     def save(self):
         db = get_database()
-        # Assuming 'job_postings' is the collection name
         collection = db['job_postings']
         job_data = {
             'job_title': self.job_title,
@@ -55,3 +54,9 @@ class JobPosting:
             {'hiring_manager_id': {'$ne': user_id}})
 
         return all_except_user
+
+    @staticmethod
+    def find_all():
+        db = get_database()
+        collection = db['job_postings']
+        return collection.find()
